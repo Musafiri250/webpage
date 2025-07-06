@@ -1,0 +1,441 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An Introduction to Statistical Learning - Course Summary</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fa;
+        }
+        .navbar {
+            background-color: #1a3c6e;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .sticky-toc {
+            position: sticky;
+            top: 80px;
+        }
+        .chapter-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .chapter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            z-index: 1000;
+        }
+        .accordion-button {
+            font-weight: 600;
+            color: #1a3c6e;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #e6f0ff;
+            color: #1a3c6e;
+        }
+        footer {
+            background-color: #1a3c6e;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">ISLP Course Summary</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#overview">Overview</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#toc">Table of Contents</a></li>
+                    <li class="nav-item"><a class="nav-link" href="https://github.com/Musafiri250/Data-Mining-Labs">GitHub</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-primary text-white text-center py-5">
+        <div class="container">
+            <h1 class="display-4 fw-bold">An Introduction to Statistical Learning with Applications in Python</h1>
+            <p class="lead">Course Summary for MSDA9223: Data Mining and Information Retrieval</p>
+            <p class="text-muted">Academic Year: 2024-2025, Semester 2 | Instructor: Dr. Pacificique Nizevimana</p>
+        </div>
+    </header>
+
+    <div class="container my-5">
+        <div class="row">
+            <!-- Sticky Table of Contents -->
+            <div class="col-lg-3 sticky-toc">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Table of Contents</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><a href="#overview" class="text-primary">Overview</a></li>
+                            <li class="list-group-item"><a href="#chapter1" class="text-primary">Chapter 1: Introduction</a></li>
+                            <li class="list-group-item"><a href="#chapter2" class="text-primary">Chapter 2: Statistical Learning</a></li>
+                            <li class="list-group-item"><a href="#chapter3" class="text-primary">Chapter 3: Linear Regression</a></li>
+                            <li class="list-group-item"><a href="#chapter4" class="text-primary">Chapter 4: Classification</a></li>
+                            <li class="list-group-item"><a href="#chapter5" class="text-primary">Chapter 5: Resampling Methods</a></li>
+                            <li class="list-group-item"><a href="#chapter6" class="text-primary">Chapter 6: Linear Model Selection</a></li>
+                            <li class="list-group-item"><a href="#chapter7" class="text-primary">Chapter 7: Moving Beyond Linearity</a></li>
+                            <li class="list-group-item"><a href="#chapter8" class="text-primary">Chapter 8: Tree-Based Methods</a></li>
+                            <li class="list-group-item"><a href="#chapter9" class="text-primary">Chapter 9: Support Vector Machines</a></li>
+                            <li class="list-group-item"><a href="#chapter10" class="text-primary">Chapter 10: Deep Learning</a></li>
+                            <li class="list-group-item"><a href="#chapter12" class="text-primary">Chapter 12: Unsupervised Learning</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <!-- Overview Section -->
+                <section id="overview" class="mb-5">
+                    <div class="card chapter-card shadow-sm">
+                        <div class="card-body">
+                            <h2 class="card-title fw-bold">Course Overview: What I Learned</h2>
+                            <p class="card-text">
+                                 This course transformed my approach to data science, equipping me with a robust toolkit for statistical learning. Through hands-on Python labs, I mastered techniques ranging from linear regression to deep learning, applying them to real-world datasets like Advertising, Boston Housing, and MNIST. The course covered supervised and unsupervised learning, model evaluation, and advanced methods, enabling me to build, assess, and interpret predictive models. This summary reflects my learning journey through the covered chapters (1–10 and 12), highlighting key concepts, practical applications, and the skills I’ve gained.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Chapter Summaries with Accordion -->
+                <div class="accordion" id="chapterAccordion">
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading1">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#chapter1" aria-expanded="true" aria-controls="chapter1">
+                                Chapter 1: Introduction
+                            </button>
+                        </h2>
+                        <div id="chapter1" class="accordion-collapse collapse show" aria-labelledby="heading1" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>This chapter introduced me to the fundamentals of statistical learning, providing a clear distinction between supervised learning (e.g., predicting sales from advertising budgets) and unsupervised learning (e.g., grouping customers by behavior). I learned the importance of balancing model interpretability with predictive accuracy and how to handle different data types (quantitative vs. qualitative). The Python-based approach, using datasets like Advertising and Wage, taught me to explore data with pandas and visualize relationships with matplotlib, laying a strong foundation for the course.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Supervised learning: Regression for continuous outcomes and classification for categorical outcomes.</li>
+                                    <li class="list-group-item">Unsupervised learning: Clustering to group similar data points and dimensionality reduction to simplify data.</li>
+                                    <li class="list-group-item">Python tools: pandas for data manipulation, matplotlib/seaborn for visualization, and scikit-learn for modeling.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Working with the Advertising dataset showed me how statistical models can optimize marketing strategies. I realized that defining the problem—whether prediction (e.g., forecasting sales) or inference (e.g., understanding variable impact)—is critical for model selection. This chapter sparked my interest in data-driven decision-making.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading2">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter2" aria-expanded="false" aria-controls="chapter2">
+                                Chapter 2: Statistical Learning
+                            </button>
+                        </h2>
+                        <div id="chapter2" class="accordion-collapse collapse" aria-labelledby="heading2" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>This chapter deepened my understanding of statistical learning by introducing the concepts of prediction (estimating outcomes) and inference (understanding relationships). The bias-variance tradeoff was a key takeaway, showing me why overly complex models overfit and simpler models underfit. I explored parametric methods (e.g., linear regression with fixed parameters) and non-parametric methods (e.g., K-nearest neighbors), applying them to datasets like Auto using Python libraries like NumPy and scikit-learn.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Parametric models: Assume a specific functional form, like linear regression, for simplicity.</li>
+                                    <li class="list-group-item">Non-parametric models: Flexible methods like KNN that adapt to data complexity without fixed assumptions.</li>
+                                    <li class="list-group-item">Model assessment: Using metrics like Mean Squared Error (MSE) for regression and error rates for classification to evaluate performance.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>The curse of dimensionality was a critical lesson, highlighting how too many features can degrade model performance. The Python labs, such as fitting a KNN model to predict car mileage, taught me to balance model complexity and generalization. I gained confidence in using scikit-learn to preprocess data and evaluate models effectively.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Data_Mining_Chapter2_Lab.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading3">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter3" aria-expanded="false" aria-controls="chapter3">
+                                Chapter 3: Linear Regression
+                            </button>
+                        </h2>
+                        <div id="chapter3" class="accordion-collapse collapse" aria-labelledby="heading3" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>Linear regression was my introduction to supervised learning, teaching me how to model relationships between predictors and continuous outcomes. I mastered simple linear regression (one predictor) and multiple linear regression (multiple predictors), learning to handle qualitative variables through one-hot encoding. The chapter emphasized diagnostics like residual plots, leverage statistics, and variance inflation factors (VIF) to assess model fit and detect issues like outliers or multicollinearity.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Least squares estimation: Minimizing squared residuals to find the best-fit line.</li>
+                                    <li class="list-group-item">Diagnostics: Residual analysis for model fit, leverage for influential points, and VIF for multicollinearity.</li>
+                                    <li class="list-group-item">Extensions: Interaction terms and polynomial regression to capture non-linear relationships.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Using the Boston Housing dataset to predict house prices, I interpreted coefficients (e.g., how crime rate affects price) and checked assumptions like linearity and normality. The labs with scikit-learn’s LinearRegression class taught me to preprocess data, fit models, and visualize residuals, reinforcing the importance of model validation in real-world applications.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Data_Mining_Chapter3_Lab2.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading4">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter4" aria-expanded="false" aria-controls="chapter4">
+                                Chapter 4: Classification
+                            </button>
+                        </h2>
+                        <div id="chapter4" class="accordion-collapse collapse" aria-labelledby="heading4" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>Classification shifted my focus to predicting categorical outcomes, teaching me why linear regression is inadequate for such tasks. I learned logistic regression to model probabilities, linear discriminant analysis (LDA) and quadratic discriminant analysis (QDA) for generative modeling, and simpler methods like naive Bayes and KNN. The chapter emphasized evaluating models with metrics like accuracy and confusion matrices.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Logistic regression: Using the logit function and maximum likelihood to predict probabilities.</li>
+                                    <li class="list-group-item">LDA and QDA: Assuming Gaussian distributions with linear or quadratic boundaries for classification.</li>
+                                    <li class="list-group-item">Naive Bayes and KNN: Probabilistic and distance-based approaches for classification.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Applying logistic regression to the Default dataset to predict credit card defaults showed me how classification informs financial risk assessment. The labs with scikit-learn’s LogisticRegression and LDA classes taught me to evaluate model performance and understand assumptions like normality in LDA, enhancing my ability to choose appropriate models.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Data_Mining_Chapter4_Lab3.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading5">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter5" aria-expanded="false" aria-controls="chapter5">
+                                Chapter 5: Resampling Methods
+                            </button>
+                        </h2>
+                        <div id="chapter5" class="accordion-collapse collapse" aria-labelledby="heading5" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>Resampling methods revolutionized my approach to model evaluation. I learned how cross-validation estimates test error by splitting data into training and validation sets, and the bootstrap quantifies uncertainty in estimates. These techniques ensured my models were robust and generalizable, critical for real-world applications.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">K-fold cross-validation: Splitting data into K folds to estimate test error efficiently.</li>
+                                    <li class="list-group-item">Leave-one-out cross-validation (LOOCV): Using one observation as the test set for precise but computationally intensive evaluation.</li>
+                                    <li class="list-group-item">Bootstrap: Sampling with replacement to estimate standard errors and confidence intervals.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Using cross-validation on the Auto dataset to select the best polynomial degree for regression taught me to optimize model performance. The bootstrap’s ability to estimate variability in predictions was eye-opening, and the Python labs with scikit-learn’s cross_val_score solidified my understanding of model validation.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Data_Mining_Chapter5_Lab4.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading6">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter6" aria-expanded="false" aria-controls="chapter6">
+                                Chapter 6: Linear Model Selection and Regularization
+                            </button>
+                        </h2>
+                        <div id="chapter6" class="accordion-collapse collapse" aria-labelledby="heading6" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>This chapter enhanced my ability to improve linear models through subset selection and regularization. I learned how to select the best predictors using methods like best subset selection and how ridge regression and lasso prevent overfitting by shrinking coefficients. Principal components regression (PCR) introduced me to combining dimensionality reduction with regression, ideal for high-dimensional data.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Best subset selection and stepwise selection: Choosing optimal predictor subsets based on criteria like AIC or BIC.</li>
+                                    <li class="list-group-item">Ridge regression and lasso: Applying L2 and L1 penalties to reduce overfitting and select features.</li>
+                                    <li class="list-group-item">PCR and partial least squares (PLS): Using dimensionality reduction to improve regression performance.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Applying lasso to the Hitters dataset to predict baseball salaries showed me how it automatically selects important features like player performance metrics. The labs with scikit-learn’s Ridge and Lasso classes taught me to tune regularization parameters, highlighting the balance between bias and variance in model selection.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Data_Mining_Chapter6_Lab5.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading7">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter7" aria-expanded="false" aria-controls="chapter7">
+                                Chapter 7: Moving Beyond Linearity
+                            </button>
+                        </h2>
+                        <div id="chapter7" class="accordion-collapse collapse" aria-labelledby="heading7" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>This chapter expanded my modeling toolkit by introducing non-linear techniques like polynomial regression, splines, and generalized additive models (GAMs). I learned how these methods capture complex relationships that linear models cannot, such as non-linear trends in wage data. Splines, in particular, taught me how to model data flexibly without overfitting.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Polynomial regression: Adding higher-order terms to model non-linear relationships.</li>
+                                    <li class="list-group-item">Regression splines and smoothing splines: Using piecewise polynomials for flexible, smooth fits.</li>
+                                    <li class="list-group-item">Generalized additive models (GAMs): Modeling multiple predictors with non-linear functions.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Using the Wage dataset to model income as a function of age and education revealed non-linear patterns, like wage peaks in mid-career. The Python labs with mgcv for GAMs and scikit-learn for splines taught me to visualize and interpret non-linear models, enhancing my ability to handle real-world data complexities.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Chapter7_Lab.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading8">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter8" aria-expanded="false" aria-controls="chapter8">
+                                Chapter 8: Tree-Based Methods
+                            </button>
+                        </h2>
+                        <div id="chapter8" class="accordion-collapse collapse" aria-labelledby="heading8" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>Tree-based methods introduced me to decision trees and powerful ensemble techniques like bagging, random forests, and boosting. I learned how decision trees split data based on feature thresholds and how ensembles improve accuracy by combining multiple trees. Random forests and gradient boosting stood out for their ability to handle complex, noisy datasets.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Decision trees: Using recursive binary splitting for regression and classification.</li>
+                                    <li class="list-group-item">Bagging and random forests: Averaging multiple trees to reduce variance and improve robustness.</li>
+                                    <li class="list-group-item">Gradient boosting and BART: Iteratively building trees to minimize prediction errors.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Applying random forests to the Boston Housing dataset to predict house prices demonstrated their robustness to outliers and missing data. The labs with scikit-learn’s RandomForestClassifier taught me to tune hyperparameters like tree depth and number of trees, balancing interpretability with predictive power.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Data_Mining_Chapter8_Lab7.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading9">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter9" aria-expanded="false" aria-controls="chapter9">
+                                Chapter 9: Support Vector Machines
+                            </button>
+                        </h2>
+                        <div id="chapter9" class="accordion-collapse collapse" aria-labelledby="heading9" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>Support Vector Machines (SVMs) taught me how to classify data by finding the optimal hyperplane that maximizes the margin between classes. I explored how kernels, like the radial basis function (RBF), enable SVMs to handle non-linear boundaries, making them versatile for complex datasets like image or text classification.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Maximal margin classifier: Finding the widest separating hyperplane for perfectly separable data.</li>
+                                    <li class="list-group-item">Support vector classifier: Allowing some misclassifications for flexibility in non-separable cases.</li>
+                                    <li class="list-group-item">SVM with kernels: Using linear and non-linear kernels (e.g., RBF) to model complex boundaries.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Using SVMs on the Iris dataset to classify flower species showed me their effectiveness in small, well-separated datasets. The labs with scikit-learn’s SVC class taught me to tune parameters like the cost parameter (C) and kernel type, highlighting the trade-off between margin size and classification error.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Data_Mining_Chapter9-Lab.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading10">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter10" aria-expanded="false" aria-controls="chapter10">
+                                Chapter 10: Deep Learning
+                            </button>
+                        </h2>
+                        <div id="chapter10" class="accordion-collapse collapse" aria-labelledby="heading10" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>Deep learning opened my eyes to neural networks, a powerful approach for modeling complex patterns in large datasets. I learned about multilayer perceptrons for general tasks, convolutional neural networks (CNNs) for images, and recurrent neural networks (RNNs) for sequences. The chapter emphasized techniques like dropout and regularization to prevent overfitting, as well as the computational demands of deep learning.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Multilayer perceptrons: Stacking layers of neurons to model non-linear relationships.</li>
+                                    <li class="list-group-item">Convolutional neural networks (CNNs): Extracting spatial features from images using convolutional layers.</li>
+                                    <li class="list-group-item">Recurrent neural networks (RNNs): Modeling sequential data with temporal dependencies.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Using TensorFlow to classify digits in the MNIST dataset was a highlight, demonstrating the power of CNNs for image recognition. The labs taught me to implement dropout and batch normalization, and I gained a deeper appreciation for the role of large datasets and computational resources in deep learning success.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Chapter10_Lab.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item chapter-card">
+                        <h2 class="accordion-header" id="heading12">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapter12" aria-expanded="false" aria-controls="chapter12">
+                                Chapter 12: Unsupervised Learning
+                            </button>
+                        </h2>
+                        <div id="chapter12" class="accordion-collapse collapse" aria-labelledby="heading12" data-bs-parent="#chapterAccordion">
+                            <div class="accordion-body">
+                                <h3>What I Learned</h3>
+                                <p>Unsupervised learning taught me how to discover hidden patterns in data without labels. I explored principal components analysis (PCA) to reduce dimensionality while preserving variance and clustering methods like K-means and hierarchical clustering to group similar observations. These techniques were invaluable for exploratory data analysis in high-dimensional settings.</p>
+                                <h3>Key Techniques</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Principal components analysis (PCA): Reducing dimensionality by projecting data onto principal components.</li>
+                                    <li class="list-group-item">K-means clustering: Partitioning data into K clusters based on similarity.</li>
+                                    <li class="list-group-item">Hierarchical clustering: Building a dendrogram to reveal hierarchical relationships among data points.</li>
+                                </ul>
+                                <h3>Practical Insights</h3>
+                                <p>Applying PCA to the NCI60 dataset allowed me to visualize high-dimensional genomic data in 2D, revealing patterns in cancer cell lines. The labs with scikit-learn’s PCA and KMeans classes taught me to preprocess data (e.g., scaling) and interpret clustering results, enhancing my ability to uncover insights from unlabeled data.</p>
+                                <p><a href="https://github.com/Musafiri250/Data-Mining-Labs/blob/main/Chapter12_Lab.ipynb" class="btn btn-outline-primary btn-sm">GitHub Lab Notebook</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="btn btn-primary back-to-top" id="backToTop">Back to Top</a>
+
+    <!-- Footer -->
+    <footer class="text-white text-center py-4">
+        <div class="container">
+            <p>Created by [Theogene TWIRINGIYIMANA] for MSDA9223 | Date: July 6, 2025</p>
+            <p><a href="https://github.com/Musafiri250/Data-Mining-Labs" class="text-white text-decoration-underline">GitHub Repository</a></p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDvM2j1K6L6y6R5L8e8k8z8K6L6y6R5L8e8k8z8K6L6y6R5L8e8k8z8K6L6y6" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <!-- Custom JS for Back to Top -->
+    <script>
+        window.onscroll = function() {
+            let backToTopButton = document.getElementById("backToTop");
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopButton.style.display = "block";
+            } else {
+                backToTopButton.style.display = "none";
+            }
+        };
+    </script>
+</body>
+</html>
